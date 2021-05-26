@@ -10,7 +10,7 @@ React-Native 虚拟手柄，支持左、右双摇杆
 
 **From yarn package**: yarn add react-native-joystick
 
-![](https://github.com/panzijian/react-native-joystick/blob/main/1622010022899293.gif)
+![](https://github.com/panzijian/react-native-joystick/blob/main/1622013016922533.gif)
 
 ## 使用方法:
 
