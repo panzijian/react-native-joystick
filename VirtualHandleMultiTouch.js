@@ -12,13 +12,14 @@ import {
     ImageBackground,
     Platform,
     findNodeHandle,
-    UIManager,
+    UIManager
 } from 'react-native';
 
 const panLeft = new Animated.ValueXY();
 const panRight = new Animated.ValueXY();
 
 export class MultiTouchButton extends React.Component {
+
     transform = {
         width: 0,
         height: 0,
@@ -36,6 +37,9 @@ export class MultiTouchButton extends React.Component {
         this.keyboard = props.keyboard || null;
         this.ygLeftHandle = props.ygLeftHandle || false;
         this.ygRightHandle = props.ygRightHandle || false;
+        this.r = props.r || null;
+        // this.defaultImage = props.defaultImage;
+        // this.focusImage = props.focusImage;
         this.click = false;
         this.touchId = -1;
         this.props.context.buttons.push(this);
@@ -62,36 +66,46 @@ export class MultiTouchButton extends React.Component {
     }
 
     render() {
-        const {focusImage ,defaultImage} = this.props;
+        const {focusImage, defaultImage} = this.props;
         return <Animated.View ref="button"
-                              collapsable={false}
-                              opacity={1}
-                              style={[{
-                                  ...this.props.style,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  overflow: 'hidden',
-                              }, this.ygLeftHandle ? {
-                                  transform: [{translateX: panLeft.x}, {translateY: panLeft.y}],
-                              } : this.ygRightHandle ? {transform: [{translateX: panRight.x}, {translateY: panRight.y}]} : {}]}>
-            <Image source={this.click ? focusImage : defaultImage}
-                   style={{
-                       width: this.props.style.width,
-                       height: this.props.style.height,
-                   }}/>
+        collapsable={false}
+        opacity={1}
+        style={[{
+                ...this.props.style,
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'hidden',
+            }, this.ygLeftHandle ? {
+                transform: [{translateX: panLeft.x}, {translateY: panLeft.y}],
+            } : this.ygRightHandle ? {transform: [{translateX: panRight.x}, {translateY: panRight.y}]} : {}]}>
+    <Image source={this.click ? focusImage : defaultImage}
+        style={{
+            width: this.props.style.width,
+                height: this.props.style.height,
+        }}/>
         </Animated.View>;
     }
 
     onClickDown(touchId) {
         this.click = true;
-            this.props.onClickDown && this.props.onClickDown();
+        if (typeof this.props.onClickDown != 'undefined') {
+            this.props.onClickDown();
+        }
         this.touchId = touchId;
+        if (this.keyboard != null) {
+            this.props.context.handlerButton(this.keyboard, true);
+        }
         this.setState({});
     }
 
     onClickUp() {
         this.click = false;
-        this.props.onClickUp && this.props.onClickUp();
+        if (typeof this.props.onClickUp != 'undefined') {
+            this.props.onClickUp();
+        }
+        if (this.keyboard != null) {
+            this.props.context.handlerButton(this.keyboard, false);
+        }
         this.touchId = -1;
         this.setState({});
     }
@@ -102,7 +116,8 @@ export class MultiTouchApp extends React.Component {
     constructor(props) {
         super(props);
         this.buttons = [];//按键集合
-        this.r = 50;//r 半径
+        this.left_r = 0;//左摇杆半径
+        this.right_r = 0;//右摇杆半径
         this.ygLeftTouch = null;
         this.ygRightTouch = null;
         console.log(this.ygLeftHandle);
@@ -126,13 +141,13 @@ export class MultiTouchApp extends React.Component {
                                 const rightX = this.ygRightTouch.transform.x;
                                 const rightY = this.ygRightTouch.transform.y;
 
-                                if (this.calculationDistance(leftX, x1, leftY, y1)) {
+                                if (this.calculationDistance(leftX, x1, leftY, y1, this.left_r)) {
                                     panLeft.setValue({
                                         x: x1 - this.ygLeftTouch.transform.px - this.ygLeftTouch.transform.width / 2,
                                         y: y1 - this.ygLeftTouch.transform.py - this.ygLeftTouch.transform.height / 2,
                                     });
                                     this.ygLeftTouch.onClickDown(e.identifier);
-                                } else if (this.calculationDistance(rightX, x1, rightY, y1)) {
+                                } else if (this.calculationDistance(rightX, x1, rightY, y1, this.right_r)) {
                                     panRight.setValue({
                                         x: x1 - this.ygRightTouch.transform.px - this.ygRightTouch.transform.width / 2,
                                         y: y1 - this.ygRightTouch.transform.py - this.ygRightTouch.transform.height / 2,
@@ -146,7 +161,6 @@ export class MultiTouchApp extends React.Component {
                                             }
                                         }
                                         b.onClickDown(e.identifier);
-                                        // throw new Break;
                                         return;
                                     }
                                 }
@@ -207,7 +221,9 @@ export class MultiTouchApp extends React.Component {
                                     e.pageX,
                                     b.transform.x,
                                     e.pageY,
-                                    b.transform.y);
+                                    b.transform.y,
+                                    this.left_r,
+                                );
 
                                 panLeft.setValue({
                                     x: position.x,
@@ -269,7 +285,9 @@ export class MultiTouchApp extends React.Component {
                                     e.pageX,
                                     b.transform.x,
                                     e.pageY,
-                                    b.transform.y);
+                                    b.transform.y,
+                                    this.right_r,
+                                );
 
                                 panRight.setValue({
                                     x: position.x,
@@ -277,8 +295,8 @@ export class MultiTouchApp extends React.Component {
                                 });
 
                                 b.onEvent && b.onEvent({
-                                    x: position.x / this.r,
-                                    y: -position.y / this.r,
+                                    x: position.x / this.right_r,
+                                    y: -position.y / this.right_r,
                                 });
                             });
                             // } else {
@@ -320,11 +338,13 @@ export class MultiTouchApp extends React.Component {
         });
     }
 
-    componentDidMount() {
+    componentDidMount(): void {
         this.buttons.forEach((e) => {
             if (e.ygLeftHandle) {
+                this.left_r = e.r;
                 this.ygLeftTouch = e;
             } else if (e.ygRightHandle) {
+                this.right_r = e.r;
                 this.ygRightTouch = e;
             }
         });
@@ -336,10 +356,11 @@ export class MultiTouchApp extends React.Component {
      * @param x1
      * @param y
      * @param y1
+     * @param r
      */
-    calculationDistance(x, x1, y, y1) {
+    calculationDistance(x, x1, y, y1, r) {
         const distance = (x - x1) * (x - x1) + (y - y1) * (y - y1);
-        if (Math.abs(distance) > (this.r * this.r)) {
+        if (Math.abs(distance) > (r * r)) {
             return false;
         } else {
             return true;
@@ -354,8 +375,9 @@ export class MultiTouchApp extends React.Component {
      * @param x0        X轴中心点
      * @param y1        移动的Y轴位置
      * @param y0        Y轴中心点
+     * @param r         半径
      */
-    calculationPosition(locationX, locationY, x1, x0, y1, y0) {
+    calculationPosition(locationX, locationY, x1, x0, y1, y0, r) {
         let h = Math.atan((x1 - x0) / (y1 - y0));
 
         let sinBoolean = -1;
@@ -376,9 +398,9 @@ export class MultiTouchApp extends React.Component {
 
         let position = {};
 
-        if (r1 >= this.r) {
-            position.x = Math.sin(h) * this.r * sinBoolean;
-            position.y = Math.cos(h) * this.r * cosBoolean;
+        if (r1 >= r) {
+            position.x = Math.sin(h) * r * sinBoolean;
+            position.y = Math.cos(h) * r * cosBoolean;
         } else {
             position.x = locationX;
             position.y = locationY;
@@ -390,6 +412,7 @@ export class MultiTouchApp extends React.Component {
 }
 
 export class MultiView extends React.Component {
+
     constructor(props) {
         super(props);
     }
