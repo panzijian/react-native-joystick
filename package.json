@@ -1,0 +1,25 @@
+
+{
+  "name": "react-native-joystick",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pzj6124/react-native-joystick.git"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": "",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/pzj6124/react-native-joystick/issues"
+  },
+  "peerDependencies": {
+    "react-native": "^0.41.2"
+  }
+}
