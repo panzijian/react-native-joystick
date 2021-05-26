@@ -14,7 +14,7 @@ React-Native 虚拟手柄，支持左、右双摇杆
 
 ## 示例:
 
-import {MultiView, MultiTouchButton, MultiTouchApp} from './VirtualHandleMultiTouch';
+import {MultiView, MultiTouchButton, MultiTouchApp} from 'react-native-joystick';
 
 class YourHandleView extends MultiTouchApp{
 
@@ -98,5 +98,5 @@ class YourHandleView extends MultiTouchApp{
 | 'onEvent' | YES | YES | 摇杆移动事件
 
 
-
+如果觉得对你的项目有帮助，请点个star，谢谢！
 
