@@ -230,14 +230,14 @@ export class MultiTouchApp extends React.Component {
                                     y: position.y,
                                 });
 
-                                // b.onEvent && b.onEvent({
-                                //     x: position.x / this.r,
-                                //     y: -position.y / this.r,
-                                // });
-                                const reg = Math.atan2(e.pageY - b.transform.py, e.pageX - b.transform.px) * 180 / Math.PI;
                                 b.onEvent && b.onEvent({
-                                    reg: reg,
+                                    x: position.x / this.left_r,
+                                    y: -position.y / this.left_r,
                                 });
+                                // const reg = Math.atan2(e.pageY - b.transform.py, e.pageX - b.transform.px) * 180 / Math.PI;
+                                // b.onEvent && b.onEvent({
+                                //     reg: reg,
+                                // });
                             });
                             // } else {
                             //     let locationX = e.locationX - (b.transform.width / 2) + panLeft.__getValue().x;

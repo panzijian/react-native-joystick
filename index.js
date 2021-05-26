@@ -1,3 +1,3 @@
-import VirtualHandleMultiTouch from './VirtualHandleMultiTouch'
+import {MultiView, MultiTouchButton, MultiTouchApp} from './VirtualHandleMultiTouch'
 
-export default VirtualHandleMultiTouch;
+export {MultiView, MultiTouchButton, MultiTouchApp}

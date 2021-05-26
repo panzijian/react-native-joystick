@@ -1,7 +1,7 @@
 
 {
   "name": "react-native-joystick",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "react-native"
   ],
   "author": "",
-  "license": "",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/pzj6124/react-native-joystick/issues"
   },
