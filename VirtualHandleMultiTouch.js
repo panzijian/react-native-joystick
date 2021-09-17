@@ -34,7 +34,6 @@ export class MultiTouchButton extends React.Component {
         this.onClickDown = this.onClickDown.bind(this);
         this.onClickUp = this.onClickUp.bind(this);
         this.onEvent = this.onEvent.bind(this);
-        this.keyboard = props.keyboard || null;
         this.ygLeftHandle = props.ygLeftHandle || false;
         this.ygRightHandle = props.ygRightHandle || false;
         this.r = props.r || null;
@@ -88,30 +87,32 @@ export class MultiTouchButton extends React.Component {
 
     onClickDown(touchId) {
         this.click = true;
-        if (typeof this.props.onClickDown != 'undefined') {
-            this.props.onClickDown();
-        }
+        this.props.onClickDown && this.props.onClickDown();
         this.touchId = touchId;
-        if (this.keyboard != null) {
-            this.props.context.handlerButton(this.keyboard, true);
-        }
         this.setState({});
     }
 
     onClickUp() {
         this.click = false;
-        if (typeof this.props.onClickUp != 'undefined') {
-            this.props.onClickUp();
-        }
-        if (this.keyboard != null) {
-            this.props.context.handlerButton(this.keyboard, false);
-        }
+        this.props.onClickUp && this.props.onClickUp();
         this.touchId = -1;
         this.setState({});
     }
 }
 
 export class MultiTouchApp extends React.Component {
+
+    componentDidMount() {
+        this.buttons.forEach((e) => {
+            if (e.ygLeftHandle) {
+                this.left_r = e.r;
+                this.ygLeftTouch = e;
+            } else if (e.ygRightHandle) {
+                this.right_r = e.r;
+                this.ygRightTouch = e;
+            }
+        });
+    }
 
     constructor(props) {
         super(props);
@@ -120,7 +121,8 @@ export class MultiTouchApp extends React.Component {
         this.right_r = 0;//右摇杆半径
         this.ygLeftTouch = null;
         this.ygRightTouch = null;
-        console.log(this.ygLeftHandle);
+        this.ygLeftPosition = {x: 0, y: 0};//当前左摇杆的位置
+        this.ygRightPosition = {x: 0, y: 0};//当前右摇杆的位置
         this.multiTouchResponder = PanResponder.create({
             onStartShouldSetPanResponder: (evt, gestureState) => true,
             onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
@@ -141,6 +143,9 @@ export class MultiTouchApp extends React.Component {
                                 const rightX = this.ygRightTouch.transform.x;
                                 const rightY = this.ygRightTouch.transform.y;
 
+                                const checkX = pos2touch.x > -width / 2 && pos2touch.x < width / 2;
+                                const checkY = pos2touch.y > -height / 2 && pos2touch.y < height / 2;
+
                                 if (this.calculationDistance(leftX, x1, leftY, y1, this.left_r)) {
                                     panLeft.setValue({
                                         x: x1 - this.ygLeftTouch.transform.px - this.ygLeftTouch.transform.width / 2,
@@ -153,16 +158,22 @@ export class MultiTouchApp extends React.Component {
                                         y: y1 - this.ygRightTouch.transform.py - this.ygRightTouch.transform.height / 2,
                                     });
                                     this.ygRightTouch.onClickDown(e.identifier);
-                                } else if (pos2touch.x > -width / 2 && pos2touch.x < width / 2) {
-                                    if (pos2touch.y > -height / 2 && pos2touch.y < height / 2) {
-                                        if (this.ygLeftTouch.click) {
-                                            if (b.keyboard >= 19 && b.keyboard <= 22) {
+                                } else if (checkX && checkY) {
+                                    if (this.ygLeftTouch.click) {
+                                        if (Math.abs(this.ygLeftPosition.x - e.pageX) < width) {
+                                            if (Math.abs(this.ygLeftPosition.y - e.pageY) < height) {
                                                 return;
                                             }
                                         }
-                                        b.onClickDown(e.identifier);
-                                        return;
+                                    } else if (this.ygRightTouch.click) {
+                                        if (Math.abs(this.ygRightPosition.x - e.pageX) < width) {
+                                            if (Math.abs(this.ygRightPosition.y - e.pageY) < height) {
+                                                return;
+                                            }
+                                        }
                                     }
+                                    b.onClickDown(e.identifier);
+                                    return;
                                 }
                             }
                         });
@@ -180,8 +191,18 @@ export class MultiTouchApp extends React.Component {
                             setTimeout(() => {
                                 if (b.ygLeftHandle) {
                                     panLeft.setValue({x: 0, y: 0});
+                                    this.ygLeftPosition = {x: 0, y: 0};
+                                    b.onEvent && b.onEvent({
+                                        x: 0,
+                                        y: 0,
+                                    });
                                 } else if (b.ygRightHandle) {
                                     panRight.setValue({x: 0, y: 0});
+                                    this.ygRightPosition = {x: 0, y: 0};
+                                    b.onEvent && b.onEvent({
+                                        x: 0,
+                                        y: 0,
+                                    });
                                 }
                             }, 10);
                             // } else {
@@ -225,6 +246,9 @@ export class MultiTouchApp extends React.Component {
                                     this.left_r,
                                 );
 
+                                this.ygLeftPosition.x = e.pageX;
+                                this.ygLeftPosition.y = e.pageY;
+
                                 panLeft.setValue({
                                     x: position.x,
                                     y: position.y,
@@ -232,7 +256,7 @@ export class MultiTouchApp extends React.Component {
 
                                 b.onEvent && b.onEvent({
                                     x: position.x / this.left_r,
-                                    y: -position.y / this.left_r,
+                                    y: position.y / this.left_r,
                                 });
                                 // const reg = Math.atan2(e.pageY - b.transform.py, e.pageX - b.transform.px) * 180 / Math.PI;
                                 // b.onEvent && b.onEvent({
@@ -289,6 +313,9 @@ export class MultiTouchApp extends React.Component {
                                     this.right_r,
                                 );
 
+                                this.ygRightPosition.x = e.pageX;
+                                this.ygRightPosition.y = e.pageY;
+
                                 panRight.setValue({
                                     x: position.x,
                                     y: position.y,
@@ -296,7 +323,7 @@ export class MultiTouchApp extends React.Component {
 
                                 b.onEvent && b.onEvent({
                                     x: position.x / this.right_r,
-                                    y: -position.y / this.right_r,
+                                    y: position.y / this.right_r,
                                 });
                             });
                             // } else {
@@ -330,23 +357,13 @@ export class MultiTouchApp extends React.Component {
                 // pan.resetAnimation();
                 panLeft.setValue({x: 0, y: 0});
                 panRight.setValue(({x: 0, y: 0}));
+                this.ygLeftPosition = {x: 0, y: 0};
+                this.ygRightPosition = {x: 0, y: 0};
                 // Animated.spring(
                 //     pan, // Auto-multiplexed
                 //     {toValue: {x: 0, y: 0}}, // Back to zero
                 // ).start();
             },
-        });
-    }
-
-    componentDidMount(): void {
-        this.buttons.forEach((e) => {
-            if (e.ygLeftHandle) {
-                this.left_r = e.r;
-                this.ygLeftTouch = e;
-            } else if (e.ygRightHandle) {
-                this.right_r = e.r;
-                this.ygRightTouch = e;
-            }
         });
     }
 
