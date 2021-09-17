@@ -38,7 +38,7 @@ import {MultiView, MultiTouchButton, MultiTouchApp} from 'react-native-joystick'
         
         render(){
             return(
-                <MultiView app={this} style={{flex : 1}}/>
+                <MultiView app={this} style={{flex : 1}}>
                 //按键
                     <MultiTouchButton
                         context={this}
@@ -76,43 +76,43 @@ import {MultiView, MultiTouchButton, MultiTouchApp} from 'react-native-joystick'
                     </ImageBackground>
                 </MultiView>               
             )
-        }
-        
-        class styles = StyleSheet.create({
-            viewX: {
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    position: 'absolute',
-                    zIndex: 999,
-                    bottom: dp(55),
-                    right: dp(106),
-                },
-                viewY: {
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    position: 'absolute',
-                    zIndex: 999,
-                    bottom: dp(97),
-                    right: dp(60),
-                },
-                viewLeftImageBackground: {
-                    position: 'absolute',
-                    zIndex: 999,
-                    left: dp(46),
-                    bottom: dp(22),
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: dp(100),
-                    height: dp(100),
-                    borderRadius: dp(100),
-                },
-                viewLeftHandle: {
-                    width: dp(35),
-                    height: dp(35),
-                    zIndex: 9999,
-                },
-        });
+        }   
     }
+    
+    class styles = StyleSheet.create({
+        viewX: {
+                width: 56,
+                height: 56,
+                position: 'absolute',
+                zIndex: 999,
+                bottom: 55,
+                right: 106,
+            },
+            viewY: {
+                width: 56,
+                height: 56,
+                position: 'absolute',
+                zIndex: 999,
+                bottom: 97,
+                right: 60,
+            },
+            viewLeftImageBackground: {
+                position: 'absolute',
+                zIndex: 999,
+                left: 46,
+                bottom: 22,
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 100,
+                height: 100,
+                borderRadius: 100,
+            },
+            viewLeftHandle: {
+                width: 35,
+                height: 35,
+                zIndex: 9999,
+            },
+    });
 
 ## API:
 
